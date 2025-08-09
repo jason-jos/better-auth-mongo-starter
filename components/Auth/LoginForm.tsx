@@ -1,16 +1,29 @@
-// import { LogoIcon } from '@/components/logo'
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Icons } from "../Icons";
 import { signIn } from "@/utils/actions";
+import SocialLogout from "./Social-SignIn";
+import SocialSignIn from "./Social-SignIn";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
+  const initialState = { errorMessage: "" };
+  const [state, formAction, isPending] = useActionState(signIn, initialState);
+
+  useEffect(() => {
+    if (state.errorMessage.length) {
+      toast.error(state.errorMessage);
+    }
+  }, [state.errorMessage]);
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form
-        action={signIn}
+        action={formAction}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]">
         <div className="p-8 pb-6">
           <div>
@@ -22,7 +35,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Button type="button" variant="outline">
+            <SocialSignIn provider="google">
               <svg xmlns="http://www.w3.org/2000/svg" width="0.98em" height="1em" viewBox="0 0 256 262">
                 <path
                   fill="#4285f4"
@@ -37,8 +50,9 @@ export default function LoginPage() {
                   fill="#eb4335"
                   d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
               </svg>
+
               <span>Google</span>
-            </Button>
+            </SocialSignIn>
             <Button type="button" variant="outline">
               <Icons.github />
               <span>Github</span>
@@ -60,7 +74,7 @@ export default function LoginPage() {
                 <Label htmlFor="pwd" className="text-title text-sm">
                   Password
                 </Label>
-                <Button asChild variant="link" size="sm">
+                <Button asChild variant="link" size="sm" disabled={isPending}>
                   <Link href="#" className="link intent-info variant-ghost text-sm">
                     Forgot your Password ?
                   </Link>
@@ -69,7 +83,9 @@ export default function LoginPage() {
               <Input type="password" required name="pwd" id="pwd" className="input sz-md variant-mixed" />
             </div>
 
-            <Button className="w-full">Sign In</Button>
+            <Button disabled={isPending} aria-disabled className="w-full">
+              Sign In
+            </Button>
           </div>
         </div>
 

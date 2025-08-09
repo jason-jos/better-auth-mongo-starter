@@ -1,10 +1,14 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { APIError } from "better-auth/api";
 
 import { redirect } from "next/navigation";
+interface State {
+  errorMessage?: String | null;
+}
 
-export async function signUp(formdata: FormData) {
+export async function signUp(prevState: State, formdata: FormData) {
   const rawFormData = {
     firstName: formdata.get("firstname") as string,
     lastName: formdata.get("lastname") as string,
@@ -24,12 +28,22 @@ export async function signUp(formdata: FormData) {
     });
     console.log(user);
   } catch (error) {
+    if (error instanceof APIError) {
+      switch (error.status) {
+        case "UNPROCESSABLE_ENTITY":
+          return { errorMessage: "User already exists." };
+        case "BAD_REQUEST":
+          return { errorMessage: "Invalid email." };
+        default:
+          return { errorMessage: "Something went wrong." };
+      }
+    }
     console.log("Something went wrong in signup", error);
   }
   redirect("/dashboard");
 }
 
-export async function signIn(formdata: FormData) {
+export async function signIn(prevState: State, formdata: FormData) {
   const rawFormData = {
     email: formdata.get("email") as string,
     password: formdata.get("pwd") as string,
@@ -44,6 +58,16 @@ export async function signIn(formdata: FormData) {
     });
     console.log("signed in!!!");
   } catch (error) {
+    if (error instanceof APIError) {
+      switch (error.status) {
+        case "UNAUTHORIZED":
+          return { errorMessage: "User Not Found." };
+        case "BAD_REQUEST":
+          return { errorMessage: "Invalid email." };
+        default:
+          return { errorMessage: "Something went wrong." };
+      }
+    }
     console.log("error signing in", error);
   }
   redirect("/dashboard");

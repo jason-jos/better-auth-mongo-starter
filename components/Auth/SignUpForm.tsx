@@ -7,20 +7,20 @@ import { signUp } from "@/utils/actions";
 // import { signUp } from "@/utils/actions";
 import Link from "next/link";
 import { useEffect, useActionState } from "react";
-// import { toast } from "sonner";
+import { toast } from "sonner";
 
 const SignUpForm = () => {
   const initialState = { errorMessage: "" };
-  // const [state, formAction, isPending] = useActionState(signUp, initialState);
-  // useEffect(() => {
-  //   if (state.errorMessage.length) {
-  //     toast.error(state.errorMessage);
-  //   }
-  // }, [state.errorMessage]);
+  const [state, formAction, isPending] = useActionState(signUp, initialState);
+  useEffect(() => {
+    if (state.errorMessage.length) {
+      toast.error(state.errorMessage);
+    }
+  }, [state.errorMessage]);
   return (
     <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form
-        action={signUp}
+        action={formAction}
         className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]">
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
           <div className="text-center">
@@ -68,7 +68,9 @@ const SignUpForm = () => {
               <Input type="password" required name="pwd" id="pwd" className="input sz-md variant-mixed" />
             </div>
 
-            <Button className="w-full">Sign Up</Button>
+            <Button disabled={isPending} aria-disabled className="w-full">
+              Sign Up
+            </Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
